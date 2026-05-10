@@ -1,0 +1,200 @@
+# =========================================================
+# FILE:
+# .github/workflows/deploy.yml
+# =========================================================
+
+name: CloudConfigOps Deployment
+
+on:
+  workflow_dispatch: 
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      REGION: asia-south1
+      ZONE: asia-south1-a
+
+    steps:
+
+      # ======================================================
+      # Checkout Repository
+      # ======================================================
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # ======================================================
+      # Authenticate to GCP
+      # ======================================================
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      # ======================================================
+      # Setup GCloud SDK
+      # ======================================================
+      - name: Setup GCloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # ======================================================
+      # Extract Project ID from Service Account Key
+      # ======================================================
+      - name: Extract Project ID
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > sa.json
+          PROJECT_ID=$(jq -r '.project_id' sa.json)
+          echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_ENV
+          echo "Detected Project ID: $PROJECT_ID"
+
+      # ======================================================
+      # Create Terraform Backend Bucket
+      # ======================================================
+      - name: Create Terraform Backend Bucket
+        run: |
+          gsutil ls -b gs://$PROJECT_ID >/dev/null 2>&1 || \
+          gsutil mb -p $PROJECT_ID -l $REGION gs://$PROJECT_ID
+
+      # ======================================================
+      # Generate backend.tf dynamically
+      # ======================================================
+      - name: Generate backend.tf
+        run: |
+          cat <<EOF > cloudconfigops/terraform/environments/dev/backend.tf
+          terraform {
+            backend "gcs" {
+              bucket = "$PROJECT_ID"
+              prefix = "cloudconfigops/dev"
+            }
+          }
+          EOF
+
+      # ======================================================
+      # Setup Terraform
+      # ======================================================
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # ======================================================
+      # Terraform Init
+      # ======================================================
+      - name: Terraform Init
+        working-directory: cloudconfigops/terraform/environments/dev
+        run: terraform init
+
+      # ======================================================
+      # Terraform Validate
+      # ======================================================
+      - name: Terraform Validate
+        working-directory: cloudconfigops/terraform/environments/dev
+        run: terraform validate
+
+      # ======================================================
+      # Terraform Plan
+      # ======================================================
+      - name: Terraform Plan
+        working-directory: cloudconfigops/terraform/environments/dev
+        run: |
+          terraform plan \
+          -var-file="dev.tfvars" \
+          -var="project_id=$PROJECT_ID" \
+          -var="region=$REGION" \
+          -var="zone=$ZONE" \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+      # ======================================================
+      # Terraform Apply
+      # ======================================================
+      - name: Terraform Apply
+        working-directory: cloudconfigops/terraform/environments/dev
+        run: |
+          terraform apply -auto-approve \
+          -var-file="dev.tfvars" \
+          -var="project_id=$PROJECT_ID" \
+          -var="region=$REGION" \
+          -var="zone=$ZONE" \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+      # ======================================================
+      # Fetch VM Public IP
+      # ======================================================
+      - name: Fetch VM Public IP
+        working-directory: cloudconfigops/terraform/environments/dev
+        run: |
+          VM_IP=$(terraform output -raw web_vm_public_ip)
+
+          echo "VM_IP=$VM_IP" >> $GITHUB_ENV
+
+          echo "VM Public IP: $VM_IP"
+
+      # ======================================================
+      # Setup SSH Private Key
+      # ======================================================
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh-keyscan -H $VM_IP >> ~/.ssh/known_hosts
+
+      # ======================================================
+      # Install Ansible
+      # ======================================================
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      # ======================================================
+      # Generate Dynamic Inventory
+      # ======================================================
+      - name: Generate Dynamic Inventory
+        run: |
+          mkdir -p cloudconfigops/ansible/inventory
+
+          cat <<EOF > cloudconfigops/ansible/inventory/dev.ini
+          [web]
+          $VM_IP ansible_user=ubuntu
+          EOF
+
+          cat cloudconfigops/ansible/inventory/dev.ini
+
+      # ======================================================
+      # Test SSH Connectivity
+      # ======================================================
+      - name: Test SSH Connectivity
+        run: |
+          ssh -i ~/.ssh/id_rsa \
+          -o StrictHostKeyChecking=no \
+          ubuntu@$VM_IP \
+          "echo SSH connection successful"
+
+      # ======================================================
+      # Run Ansible Playbook
+      # ======================================================
+      - name: Run Ansible Playbook
+        working-directory: cloudconfigops/ansible
+        run: |
+          ansible-playbook playbooks/site.yml
+      # ======================================================
+      # Deployment Summary
+      # ======================================================
+      - name: Deployment Summary
+        run: |
+          echo "==================================="
+          echo "CloudConfigOps Deployment Complete"
+          echo "==================================="
+          echo "Project ID : $PROJECT_ID"
+          echo "VM IP      : $VM_IP"
+          echo "Application: http://$VM_IP"
+          echo "==================================="

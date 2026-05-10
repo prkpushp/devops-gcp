@@ -1,0 +1,8 @@
+- name: Configure CloudConfigOps Servers
+  hosts: all
+  become: yes
+
+  roles:
+    - common
+    - docker
+    - nginx

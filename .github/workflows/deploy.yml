@@ -1,0 +1,81 @@
+name: Deploy Infra + App
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose action"
+        required: true
+        default: "apply"
+        type: choice
+        options:
+          - apply
+          - destroy
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: false
+  
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Auth GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set Project ID
+        run: |
+          echo "PROJECT_ID=$(echo '${{ secrets.GCP_SA_KEY }}' | jq -r .project_id)" >> $GITHUB_ENV
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        
+      - name: Create State Bucket (if not exists)
+        run: |
+          BUCKET_NAME="${PROJECT_ID}-tf-state"
+          if gsutil ls -b gs://$BUCKET_NAME >/dev/null 2>&1; then
+            echo "Bucket already exists"
+          else
+            echo "Creating bucket..."
+            gsutil mb -p $PROJECT_ID -l us-central1 gs://$BUCKET_NAME
+            gsutil versioning set on gs://$BUCKET_NAME
+          fi
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init \
+            -backend-config="bucket=${{ env.PROJECT_ID }}-tf-state" \
+            -backend-config="prefix=devops-project" \
+            -reconfigure
+
+      - name: Terraform Apply
+        if: ${{ github.event.inputs.action == 'apply' }}
+        run: |
+          cd terraform
+          terraform apply -auto-approve
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        run: |
+          cd terraform
+          terraform destroy -auto-approve
+        env:
+          TF_VAR_project_id: ${{ env.PROJECT_ID }}
+          
