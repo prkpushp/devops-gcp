@@ -7,6 +7,11 @@ mig_name = "cloudscaleops-mig"
 target_size = 2
 domain_name = "wealthbridgezone.com"
 subdomain = "cloud"
+network_name = "dev-network"
+firewall_name = "dev-allow-ssh-http"
+firewall_ports = ["22", "80", "443"]
+firewall_source_ranges = ["0.0.0.0/0"]
+firewall_target_tags = ["web-dev"]
 
 gcp_apis = [
   "compute.googleapis.com",
