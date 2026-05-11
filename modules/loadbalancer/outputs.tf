@@ -3,9 +3,7 @@ output "lb_ip" {
 }
 
 output "application_url" {
-  value = "https://${local.fqdn}"
+  value = "https://${var.domain_name}"
 }
 
-locals {
-  fqdn = var.fqdn
-}
+
