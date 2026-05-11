@@ -38,5 +38,5 @@ module "autoscaler" {
   source = "../../../../modules/autoscaler"
   name   = "cloudscaleops-autoscaler"
   region = var.region
-  target = module.mig.instance_group
+  target = module.mig.instance_group_manager
 }
