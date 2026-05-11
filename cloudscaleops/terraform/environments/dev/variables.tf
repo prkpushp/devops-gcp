@@ -42,9 +42,6 @@ variable "api_target_size" {}
 variable "web_instance_tag" {}
 variable "api_instance_tag" {}
 
-variable "target_size" {
-  type = number
-}
 
 variable "ssh_public_key" {
   type = string
