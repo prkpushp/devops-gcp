@@ -14,6 +14,17 @@ firewall_target_tags = ["web-ssh-cloudscaleops-dev"]
 instance_tag = "web-ssh-cloudscaleops-dev"
 package_name = "nginx"
 welcome_message = "cloudscaleops running successfully"
+web_template_name = "cloudscaleops-web-template"
+api_template_name = "cloudscaleops-api-template"
+
+web_mig_name = "cloudscaleops-web"
+api_mig_name = "cloudscaleops-api"
+
+web_target_size = 2
+api_target_size = 2
+
+web_instance_tag = "web-cloudscaleops-dev"
+api_instance_tag = "api-cloudscaleops-dev"
 
 gcp_apis = [
   "compute.googleapis.com",
