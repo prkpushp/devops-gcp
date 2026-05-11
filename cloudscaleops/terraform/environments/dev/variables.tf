@@ -70,3 +70,7 @@ variable "firewall_source_ranges" {
 variable "firewall_target_tags" {
   type = list(string)
 }
+
+variable "instance_tag" {
+  type = string
+}
