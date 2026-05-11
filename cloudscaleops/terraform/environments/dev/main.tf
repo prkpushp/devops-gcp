@@ -54,7 +54,8 @@ module "api_mig" {
 module "loadbalancer" {
   source         = "../../../../modules/loadbalancer"
   name           = "cloudscaleops"
-  instance_group = module.mig.instance_group
+  web_instance_group = module.web_mig.instance_group
+  api_instance_group = module.api_mig.instance_group
   fqdn = local.fqdn 
 }
 
