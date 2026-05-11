@@ -9,3 +9,11 @@ variable "instance_group" {
 variable "fqdn" {
   type = string
 }
+
+variable "path_rules" {
+
+  type = list(object({
+    paths   = list(string)
+    service = string
+  }))
+}
