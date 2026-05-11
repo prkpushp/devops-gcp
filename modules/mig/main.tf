@@ -3,7 +3,7 @@ resource "google_compute_instance_template" "template" {
   name_prefix  = var.template_name
   machine_type = var.machine_type
 
-  tags = ["http-server"]
+  tags = ["web-server", "http-server"]
 
   disk {
     source_image = "debian-cloud/debian-12"
