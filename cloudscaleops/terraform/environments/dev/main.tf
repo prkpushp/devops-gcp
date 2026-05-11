@@ -13,8 +13,11 @@ module "network" {
 }
 
 module "firewall" {
-  source  = "../../../../modules/firewall"
+  source = "../../../../modules/firewall"
   network = module.network.network_name
+  ports = ["22", "80", "443"]
+  source_ranges = ["0.0.0.0/0"]
+  target_tags = ["web-server"]
 }
 
 module "mig" {
