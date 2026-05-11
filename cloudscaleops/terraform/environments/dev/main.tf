@@ -21,19 +21,34 @@ module "firewall" {
   target_tags = [var.instance_tag]
 }
 
-module "mig" {
+module "web_mig" {
   source = "../../../../modules/mig"
 
-  template_name  = var.template_name
-  machine_type   = var.machine_type
-  subnetwork     = module.network.subnet_name
-  ssh_public_key = var.ssh_public_key
-  mig_name       = var.mig_name
-  region         = var.region
-  target_size    = var.target_size
-  instance_tag   = var.instance_tag
-  package_name   = var.package_name
-  welcome_message = var.welcome_message
+  template_name   = var.web_template_name
+  machine_type    = var.machine_type
+  subnetwork      = module.network.subnet_name
+  ssh_public_key  = var.ssh_public_key
+  mig_name        = var.web_mig_name
+  region          = var.region
+  target_size     = var.web_target_size
+  instance_tag    = var.web_instance_tag
+  package_name    = var.package_name
+  welcome_message = "WEB SERVER"
+}
+
+module "api_mig" {
+  source = "../../../../modules/mig"
+
+  template_name   = var.api_template_name
+  machine_type    = var.machine_type
+  subnetwork      = module.network.subnet_name
+  ssh_public_key  = var.ssh_public_key
+  mig_name        = var.api_mig_name
+  region          = var.region
+  target_size     = var.api_target_size
+  instance_tag    = var.api_instance_tag
+  package_name    = var.package_name
+  welcome_message = "API SERVER"
 }
 
 module "loadbalancer" {
