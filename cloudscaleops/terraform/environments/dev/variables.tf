@@ -77,10 +77,6 @@ variable "package_name" {
   type = string
 }
 
-variable "welcome_message" {
-  type = string
-}
-
 variable "instance_tag" {
   type = string
 }
