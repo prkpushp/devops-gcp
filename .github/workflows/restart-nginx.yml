@@ -1,0 +1,30 @@
+name: Restart Nginx
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      host:
+        description: "Target host"
+        required: true
+
+jobs:
+
+  restart-nginx:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Restart nginx remotely
+
+        uses: appleboy/ssh-action@v1.2.0
+
+        with:
+          host: ${{ github.event.inputs.host }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+          script: |
+            sudo systemctl restart nginx
+            sudo systemctl status nginx --no-pager
