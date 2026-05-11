@@ -26,6 +26,13 @@ api_target_size = 2
 web_instance_tag = "web-ssh-cloudscaleops-dev"
 api_instance_tag = "web-ssh-cloudscaleops-dev"
 
+path_rules = [
+  {
+    paths   = ["/api", "/api/*"]
+    service = "api"
+  }
+]
+
 gcp_apis = [
   "compute.googleapis.com",
   "dns.googleapis.com",
