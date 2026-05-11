@@ -74,3 +74,11 @@ variable "firewall_target_tags" {
 variable "instance_tag" {
   type = string
 }
+
+variable "package_name" {
+  type = string
+}
+
+variable "welcome_message" {
+  type = string
+}
