@@ -23,8 +23,8 @@ api_mig_name = "cloudscaleops-api"
 web_target_size = 2
 api_target_size = 2
 
-web_instance_tag = "web-cloudscaleops-dev"
-api_instance_tag = "api-cloudscaleops-dev"
+web_instance_tag = "web-ssh-cloudscaleops-dev"
+api_instance_tag = "web-ssh-cloudscaleops-dev"
 
 gcp_apis = [
   "compute.googleapis.com",
