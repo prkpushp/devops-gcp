@@ -5,3 +5,7 @@ output "lb_ip" {
 output "application_url" {
   value = "https://${local.fqdn}"
 }
+
+locals {
+  fqdn = var.fqdn
+}
