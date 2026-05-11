@@ -1,13 +1,13 @@
 resource "google_compute_firewall" "allow_ssh_http" {
-  name    = "allow-ssh-http"
+  name    = var.name
   network = var.network
 
   allow {
     protocol = "tcp"
-    ports    = ["22", "80"]
+    ports    = var.ports
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.source_ranges
 
-  target_tags = ["web-server"]
+  target_tags = var.target_tags
 }

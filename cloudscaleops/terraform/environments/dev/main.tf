@@ -13,12 +13,16 @@ module "network" {
 }
 
 module "firewall" {
-  source  = "../../../../modules/firewall"
+  source = "../../../../modules/firewall"
   network = module.network.network_name
+  name = var.firewall_name
+  ports = var.firewall_ports
+  source_ranges = var.firewall_source_ranges
+  target_tags = [var.instance_tag]
 }
 
 module "mig" {
-  source         = "../../../../modules/mig"
+  source = "../../../../modules/mig"
   template_name  = var.template_name
   machine_type   = var.machine_type
   subnetwork     = module.network.subnet_name
@@ -26,6 +30,7 @@ module "mig" {
   mig_name       = var.mig_name
   region         = var.region
   target_size    = var.target_size
+  instance_tag   = var.instance_tag
 }
 
 module "loadbalancer" {

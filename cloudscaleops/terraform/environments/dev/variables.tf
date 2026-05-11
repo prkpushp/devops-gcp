@@ -53,3 +53,24 @@ variable "domain_name" {
 variable "subdomain" {
   type = string
 }
+
+
+variable "firewall_name" {
+  type = string
+}
+
+variable "firewall_ports" {
+  type = list(string)
+}
+
+variable "firewall_source_ranges" {
+  type = list(string)
+}
+
+variable "firewall_target_tags" {
+  type = list(string)
+}
+
+variable "instance_tag" {
+  type = string
+}
