@@ -6,7 +6,8 @@
 name: CloudConfigOps Deployment
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
+
   push:
     branches:
       - dev
@@ -15,7 +16,9 @@ permissions:
   contents: read
 
 jobs:
+
   deploy:
+
     runs-on: ubuntu-latest
 
     env:
@@ -45,13 +48,17 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       # ======================================================
-      # Extract Project ID from Service Account Key
+      # Extract Project ID
       # ======================================================
       - name: Extract Project ID
         run: |
+
           echo '${{ secrets.GCP_SA_KEY }}' > sa.json
+
           PROJECT_ID=$(jq -r '.project_id' sa.json)
+
           echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_ENV
+
           echo "Detected Project ID: $PROJECT_ID"
 
       # ======================================================
@@ -59,21 +66,28 @@ jobs:
       # ======================================================
       - name: Create Terraform Backend Bucket
         run: |
+
           gsutil ls -b gs://$PROJECT_ID >/dev/null 2>&1 || \
           gsutil mb -p $PROJECT_ID -l $REGION gs://$PROJECT_ID
 
       # ======================================================
-      # Generate backend.tf dynamically
+      # Generate backend.tf
       # ======================================================
       - name: Generate backend.tf
         run: |
+
           cat <<EOF > cloudconfigops/terraform/environments/dev/backend.tf
+
           terraform {
+
             backend "gcs" {
+
               bucket = "$PROJECT_ID"
+
               prefix = "cloudconfigops/dev"
             }
           }
+
           EOF
 
       # ======================================================
@@ -102,6 +116,7 @@ jobs:
       - name: Terraform Plan
         working-directory: cloudconfigops/terraform/environments/dev
         run: |
+
           terraform plan \
           -var-file="dev.tfvars" \
           -var="project_id=$PROJECT_ID" \
@@ -115,6 +130,7 @@ jobs:
       - name: Terraform Apply
         working-directory: cloudconfigops/terraform/environments/dev
         run: |
+
           terraform apply -auto-approve \
           -var-file="dev.tfvars" \
           -var="project_id=$PROJECT_ID" \
@@ -123,36 +139,66 @@ jobs:
           -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
 
       # ======================================================
-      # Fetch VM Public IP
+      # Fetch Terraform Outputs
       # ======================================================
-      - name: Fetch VM Public IP
+      - name: Fetch Terraform Outputs
         working-directory: cloudconfigops/terraform/environments/dev
         run: |
-          VM_IP=$(terraform output -raw web_vm_public_ip)
 
-          echo "VM_IP=$VM_IP" >> $GITHUB_ENV
+          HAPROXY_PUBLIC_IP=$(terraform output -raw haproxy_public_ip)
 
-          echo "VM Public IP: $VM_IP"
+          APP_VM_1_PUBLIC_IP=$(terraform output -raw app_vm_1_public_ip)
+
+          APP_VM_2_PUBLIC_IP=$(terraform output -raw app_vm_2_public_ip)
+
+          echo "HAPROXY_PUBLIC_IP=$HAPROXY_PUBLIC_IP" >> $GITHUB_ENV
+
+          echo "APP_VM_1_PUBLIC_IP=$APP_VM_1_PUBLIC_IP" >> $GITHUB_ENV
+
+          echo "APP_VM_2_PUBLIC_IP=$APP_VM_2_PUBLIC_IP" >> $GITHUB_ENV
+
+          echo "================================="
+          echo "HAProxy IP : $HAPROXY_PUBLIC_IP"
+          echo "App VM 1   : $APP_VM_1_PUBLIC_IP"
+          echo "App VM 2   : $APP_VM_2_PUBLIC_IP"
+          echo "================================="
 
       # ======================================================
-      # Setup SSH Private Key
+      # Wait for VM Boot
+      # ======================================================
+      - name: Wait for VM Boot
+        run: |
+
+          echo "Waiting for VMs to become ready..."
+
+          sleep 60
+
+      # ======================================================
+      # Setup SSH Key
       # ======================================================
       - name: Setup SSH Key
         run: |
+
           mkdir -p ~/.ssh
 
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
 
           chmod 600 ~/.ssh/id_rsa
 
-          ssh-keyscan -H $VM_IP >> ~/.ssh/known_hosts
+          ssh-keyscan -H $HAPROXY_PUBLIC_IP >> ~/.ssh/known_hosts
+
+          ssh-keyscan -H $APP_VM_1_PUBLIC_IP >> ~/.ssh/known_hosts
+
+          ssh-keyscan -H $APP_VM_2_PUBLIC_IP >> ~/.ssh/known_hosts
 
       # ======================================================
       # Install Ansible
       # ======================================================
       - name: Install Ansible
         run: |
+
           sudo apt-get update
+
           sudo apt-get install -y ansible
 
       # ======================================================
@@ -160,12 +206,23 @@ jobs:
       # ======================================================
       - name: Generate Dynamic Inventory
         run: |
+
           mkdir -p cloudconfigops/ansible/inventory
 
           cat <<EOF > cloudconfigops/ansible/inventory/dev.ini
-          [web]
-          $VM_IP ansible_user=ubuntu
+
+          [loadbalancer]
+          haproxy ansible_host=$HAPROXY_PUBLIC_IP ansible_user=ubuntu
+
+          [app]
+          app1 ansible_host=$APP_VM_1_PUBLIC_IP ansible_user=ubuntu
+          app2 ansible_host=$APP_VM_2_PUBLIC_IP ansible_user=ubuntu
+
           EOF
+
+          echo "================================="
+          echo "Generated Inventory"
+          echo "================================="
 
           cat cloudconfigops/ansible/inventory/dev.ini
 
@@ -174,10 +231,21 @@ jobs:
       # ======================================================
       - name: Test SSH Connectivity
         run: |
-          ssh -i ~/.ssh/id_rsa \
-          -o StrictHostKeyChecking=no \
-          ubuntu@$VM_IP \
-          "echo SSH connection successful"
+
+          for HOST in \
+            $HAPROXY_PUBLIC_IP \
+            $APP_VM_1_PUBLIC_IP \
+            $APP_VM_2_PUBLIC_IP
+          do
+
+            echo "Testing SSH on $HOST"
+
+            ssh -i ~/.ssh/id_rsa \
+            -o StrictHostKeyChecking=no \
+            ubuntu@$HOST \
+            "echo SSH connection successful"
+
+          done
 
       # ======================================================
       # Run Ansible Playbook
@@ -185,16 +253,28 @@ jobs:
       - name: Run Ansible Playbook
         working-directory: cloudconfigops/ansible
         run: |
+
           ansible-playbook playbooks/site.yml
+
       # ======================================================
       # Deployment Summary
       # ======================================================
       - name: Deployment Summary
         run: |
-          echo "==================================="
+
+          echo "====================================="
           echo "CloudConfigOps Deployment Complete"
-          echo "==================================="
-          echo "Project ID : $PROJECT_ID"
-          echo "VM IP      : $VM_IP"
-          echo "Application: http://$VM_IP"
-          echo "==================================="
+          echo "====================================="
+
+          echo "Project ID  : $PROJECT_ID"
+
+          echo "HAProxy IP  : $HAPROXY_PUBLIC_IP"
+
+          echo "App VM 1    : $APP_VM_1_PUBLIC_IP"
+
+          echo "App VM 2    : $APP_VM_2_PUBLIC_IP"
+
+          echo "====================================="
+          echo "Application URL"
+          echo "http://$HAPROXY_PUBLIC_IP"
+          echo "====================================="

@@ -1,8 +1,17 @@
-- name: Configure CloudConfigOps Servers
-  hosts: all
-  become: yes
+- hosts: all
+  become: true
 
   roles:
     - common
-    - docker
+
+- hosts: app
+  become: true
+
+  roles:
     - nginx
+
+- hosts: loadbalancer
+  become: true
+
+  roles:
+    - haproxy

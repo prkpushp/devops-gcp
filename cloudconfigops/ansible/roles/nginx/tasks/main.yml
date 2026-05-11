@@ -2,16 +2,15 @@
   apt:
     name: nginx
     state: present
+    update_cache: yes
 
-- name: Copy custom index page
+- name: Deploy custom index.html
   template:
     src: index.html.j2
     dest: /var/www/html/index.html
-  notify:
-    - restart nginx
 
-- name: Ensure nginx service is running
+- name: Restart Nginx
   service:
     name: nginx
+    state: restarted
     enabled: yes
-    state: started
