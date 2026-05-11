@@ -20,6 +20,14 @@ tags = [var.instance_tag]
     ssh-keys = "ubuntu:${var.ssh_public_key}"
   }
 
+  metadata_startup_script = templatefile(
+    "${path.module}/startup.sh.tpl",
+    {
+      package_name   = var.package_name
+      welcome_message = var.welcome_message
+    }
+  )
+
   lifecycle {
     create_before_destroy = true
   }
