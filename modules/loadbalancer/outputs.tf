@@ -5,3 +5,7 @@ output "lb_ip" {
 output "application_url" {
   value = "https://${var.fqdn}"
 }
+
+output "lb_ip" {
+  value = google_compute_global_address.lb_ip.address
+}
