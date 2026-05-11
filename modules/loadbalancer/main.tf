@@ -16,9 +16,24 @@ resource "google_compute_health_check" "http_health_check" {
 # -----------------------------
 # Backend Service (MIG)
 # -----------------------------
-resource "google_compute_backend_service" "backend" {
-  name        = "${var.name}-backend"
+resource "google_compute_backend_service" "web_backend" {
+  name        = "${var.name}-web-backend"
   protocol    = "HTTP"
+  timeout_sec = 10
+  health_checks = [
+    google_compute_health_check.http_health_check.id
+  ]
+  backend {
+    group = var.web_instance_group
+  }
+}
+
+resource "google_compute_backend_service" "api_backend" {
+
+  name        = "${var.name}-api-backend"
+
+  protocol    = "HTTP"
+
   timeout_sec = 10
 
   health_checks = [
@@ -26,7 +41,7 @@ resource "google_compute_backend_service" "backend" {
   ]
 
   backend {
-    group = var.instance_group
+    group = var.api_instance_group
   }
 }
 
