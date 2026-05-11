@@ -1,20 +1,66 @@
-variable "project_id" {}
+# =====================================================
+# GCP
+# =====================================================
 
-variable "region" {}
+variable "project_id" {
+  type = string
+}
 
-variable "zone" {}
+variable "region" {
+  type = string
+}
 
-variable "ssh_public_key" {}
+variable "zone" {
+  type = string
+}
 
-variable "network_name" {}
+# =====================================================
+# Network
+# =====================================================
 
-variable "subnet_name" {}
+variable "network_name" {
+  type = string
+}
 
-variable "subnet_cidr" {}
+variable "subnet_name" {
+  type = string
+}
 
-variable "instance_name" {}
+variable "subnet_cidr" {
+  type = string
+}
 
-variable "machine_type" {}
+# =====================================================
+# VM Configuration
+# =====================================================
+
+variable "machine_type" {
+  type = string
+}
+
+variable "haproxy_vm_name" {
+  type = string
+}
+
+variable "app_vm_1_name" {
+  type = string
+}
+
+variable "app_vm_2_name" {
+  type = string
+}
+
+# =====================================================
+# SSH
+# =====================================================
+
+variable "ssh_public_key" {
+  type = string
+}
+
+# =====================================================
+# APIs
+# =====================================================
 
 variable "gcp_apis" {
   type = list(string)
