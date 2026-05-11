@@ -133,26 +133,30 @@ jobs:
 
       - name: Create Hostinger DNS Record
         run: |
-      
           DOMAIN="wealthbridgezone.com"
-      
           SUBDOMAIN="cloud"
       
-          RECORD="${SUBDOMAIN}.${DOMAIN}"
-      
-          echo "Creating DNS record for $RECORD"
+          echo "Creating DNS record for ${SUBDOMAIN}.${DOMAIN}"
       
           curl -X POST \
             "https://developers.hostinger.com/api/dns/v1/zones/$DOMAIN/records" \
             -H "Authorization: Bearer ${{ secrets.HOSTINGER_API }}" \
             -H "Content-Type: application/json" \
             -d "{
-              \"type\": \"A\",
-              \"name\": \"$SUBDOMAIN\",
-              \"content\": \"$LB_IP\",
-              \"ttl\": 300
-            }"
-      # ==================================================
+              \"domain\": \"$DOMAIN\",
+              \"overwrite\": true,
+              \"resource_records\": [
+                {
+                  \"type\": \"A\",
+                  \"name\": \"$SUBDOMAIN\",
+                  \"records\": [
+                    {
+                      \"content\": \"$LB_IP\"
+                    }
+                  ]
+                }
+              ]
+            }"      # ==================================================
       # Fetch Load Balancer IP
       # ==================================================
 
