@@ -1,0 +1,111 @@
+name: Destroy CloudScaleOps
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    env:
+      REGION: asia-south1
+      ZONE: asia-south1-a
+
+    steps:
+
+      # =====================================================
+      # Checkout Repository
+      # =====================================================
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # =====================================================
+      # Authenticate to GCP
+      # =====================================================
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      # =====================================================
+      # Setup GCloud SDK
+      # =====================================================
+
+      - name: Setup GCloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # =====================================================
+      # Extract Project ID
+      # =====================================================
+
+      - name: Extract Project ID
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > sa.json
+
+          PROJECT_ID=$(jq -r '.project_id' sa.json)
+
+          echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_ENV
+
+          echo "Detected Project ID: $PROJECT_ID"
+
+      # =====================================================
+      # Generate backend.tf dynamically
+      # =====================================================
+
+      - name: Generate backend.tf
+        run: |
+          cat <<EOF > cloudscaleops/terraform/environments/dev/backend.tf
+          terraform {
+            backend "gcs" {
+              bucket = "$PROJECT_ID"
+              prefix = "cloudscaleops/dev"
+            }
+          }
+          EOF
+
+      # =====================================================
+      # Setup Terraform
+      # =====================================================
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      # =====================================================
+      # Terraform Init
+      # =====================================================
+
+      - name: Terraform Init
+        working-directory: cloudscaleops/terraform/environments/dev
+        run: terraform init
+
+      # =====================================================
+      # Terraform Destroy
+      # =====================================================
+
+      - name: Terraform Destroy
+        working-directory: cloudscaleops/terraform/environments/dev
+        run: |
+          terraform destroy -auto-approve \
+          -var-file="dev.tfvars" \
+          -var="project_id=$PROJECT_ID" \
+          -var="region=$REGION" \
+          -var="zone=$ZONE" \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+      # =====================================================
+      # Cleanup Summary
+      # =====================================================
+
+      - name: Destroy Summary
+        run: |
+          echo "================================="
+          echo "CloudScaleOps Destroy Complete"
+          echo "================================="
+          echo "Project ID : $PROJECT_ID"
+          echo "Environment destroyed successfully"
+          echo "================================="
