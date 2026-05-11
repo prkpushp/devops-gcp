@@ -57,6 +57,7 @@ module "loadbalancer" {
   web_instance_group = module.web_mig.instance_group
   api_instance_group = module.api_mig.instance_group
   fqdn = local.fqdn 
+  path_rules = var.path_rules
 }
 
 module "autoscaler" {
