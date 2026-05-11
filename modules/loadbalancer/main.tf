@@ -46,8 +46,38 @@ resource "google_compute_url_map" "http_redirect" {
 # HTTPS URL Map (real traffic)
 # -----------------------------
 resource "google_compute_url_map" "url_map" {
-  name            = "${var.name}-url-map"
-  default_service = google_compute_backend_service.backend.id
+
+  name = "${var.name}-url-map"
+
+  default_service = google_compute_backend_service.web_backend.id
+
+  host_rule {
+    hosts        = ["*"]
+    path_matcher = "path-matcher"
+  }
+
+  path_matcher {
+
+    name            = "path-matcher"
+
+    default_service = google_compute_backend_service.web_backend.id
+
+    dynamic "path_rule" {
+
+      for_each = var.path_rules
+
+      content {
+
+        paths = path_rule.value.paths
+
+        service = (
+          path_rule.value.service == "api"
+          ? google_compute_backend_service.api_backend.id
+          : google_compute_backend_service.web_backend.id
+        )
+      }
+    }
+  }
 }
 
 # -----------------------------
