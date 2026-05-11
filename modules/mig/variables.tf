@@ -5,3 +5,6 @@ variable "ssh_public_key" {}
 variable "mig_name" {}
 variable "region" {}
 variable "target_size" {}
+variable "instance_tag" {
+  type = string
+}
