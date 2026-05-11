@@ -1,0 +1,7 @@
+variable "template_name" {}
+variable "machine_type" {}
+variable "subnetwork" {}
+variable "ssh_public_key" {}
+variable "mig_name" {}
+variable "region" {}
+variable "target_size" {}
