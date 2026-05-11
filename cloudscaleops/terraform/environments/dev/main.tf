@@ -32,7 +32,7 @@ module "loadbalancer" {
   source         = "../../../../modules/loadbalancer"
   name           = "cloudscaleops"
   instance_group = module.mig.instance_group
-  fqdn           = local.fqdn
+  domains = [var.fqdn]
 }
 
 module "autoscaler" {
