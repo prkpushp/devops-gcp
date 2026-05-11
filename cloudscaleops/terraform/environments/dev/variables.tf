@@ -90,3 +90,11 @@ variable "package_name" {
 variable "welcome_message" {
   type = string
 }
+
+variable "path_rules" {
+
+  type = list(object({
+    paths   = list(string)
+    service = string
+  }))
+}
