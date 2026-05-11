@@ -178,6 +178,12 @@ jobs:
 
           chmod 600 ~/.ssh/id_rsa
 
+      - name: Debug VM IPs
+        run: |
+          echo "======= VM IPS ======="
+          cat vm_ips.txt || true
+          echo "======================"
+
       # ==================================================
       # Generate Dynamic Inventory
       # ==================================================
