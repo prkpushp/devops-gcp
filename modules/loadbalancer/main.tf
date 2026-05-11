@@ -58,3 +58,11 @@ resource "google_compute_target_https_proxy" "https_proxy" {
     google_compute_managed_ssl_certificate.ssl_cert.id
   ]
 }
+
+resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {
+  name = "cloudscaleops-https-rule"
+
+  target = google_compute_target_https_proxy.https_proxy.id
+
+  port_range = "443"
+}
