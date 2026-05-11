@@ -191,15 +191,24 @@ jobs:
       - name: Generate Dynamic Inventory
         run: |
           mkdir -p cloudscaleops/ansible/inventory
-
+      
           echo "[web]" > cloudscaleops/ansible/inventory/dev.ini
-
+      
           while read ip; do
+      
             echo "$ip ansible_user=ubuntu" >> cloudscaleops/ansible/inventory/dev.ini
-
-            ssh-keyscan -H $ip >> ~/.ssh/known_hosts
+      
+            echo "Waiting for SSH on $ip ..."
+      
+            timeout 300 bash -c "
+              until ssh-keyscan -H $ip >> ~/.ssh/known_hosts 2>/dev/null
+              do
+                sleep 5
+              done
+            "
+      
           done < vm_ips.txt
-
+      
           cat cloudscaleops/ansible/inventory/dev.ini
 
       # ==================================================
