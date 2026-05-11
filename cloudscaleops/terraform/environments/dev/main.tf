@@ -22,7 +22,7 @@ module "firewall" {
 }
 
 module "mig" {
-  source         = "../../../../modules/mig"
+  source = "../../../../modules/mig"
   template_name  = var.template_name
   machine_type   = var.machine_type
   subnetwork     = module.network.subnet_name
@@ -30,6 +30,7 @@ module "mig" {
   mig_name       = var.mig_name
   region         = var.region
   target_size    = var.target_size
+  instance_tag   = var.instance_tag
 }
 
 module "loadbalancer" {
