@@ -1,0 +1,5 @@
+ssh_port: 22
+disable_root_login: true
+disable_password_auth: true
+install_fail2ban: true
+enable_ufw: true
