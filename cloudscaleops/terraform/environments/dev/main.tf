@@ -42,6 +42,14 @@ module "autoscaler" {
   target = module.mig.instance_group_manager
 }
 
+module "dns" {
+  source     = "../../../../modules/dns"
+
+  domain     = var.domain_name
+  zone_name  = "wealthbridgezone-zone"
+  lb_ip      = module.loadbalancer.lb_ip
+}
+
 locals {
   fqdn = "${var.subdomain}.${var.domain_name}"
 }
