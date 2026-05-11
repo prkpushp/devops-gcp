@@ -1,0 +1,7 @@
+- name: Configure Web Servers
+  hosts: web
+  become: true
+
+  roles:
+    - common
+    - nginx
