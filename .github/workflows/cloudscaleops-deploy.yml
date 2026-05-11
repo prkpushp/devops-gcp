@@ -275,6 +275,6 @@ jobs:
           echo "==================================="
           echo "Project ID        : $PROJECT_ID"
           echo "Load Balancer IP  : $LB_IP"
-          echo "Application URL   : http://$LB_IP"
+          echo "Application URL  : https://cloud.wealthbridgezone.com"
           echo "==================================="
 
