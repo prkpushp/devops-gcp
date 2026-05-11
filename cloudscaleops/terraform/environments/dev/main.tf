@@ -15,9 +15,10 @@ module "network" {
 module "firewall" {
   source = "../../../../modules/firewall"
   network = module.network.network_name
-  ports = ["22", "80", "443"]
-  source_ranges = ["0.0.0.0/0"]
-  target_tags = ["web-server"]
+  name          = var.firewall_name
+  ports         = var.firewall_ports
+  source_ranges = var.firewall_source_ranges
+  target_tags   = var.firewall_target_tags
 }
 
 module "mig" {
