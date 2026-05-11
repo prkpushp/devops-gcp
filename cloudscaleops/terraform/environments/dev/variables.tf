@@ -26,9 +26,6 @@ variable "machine_type" {
   type = string
 }
 
-variable "template_name" {
-  type = string
-}
 
 variable "web_template_name" {}
 variable "api_template_name" {}
@@ -74,10 +71,6 @@ variable "firewall_source_ranges" {
 
 variable "firewall_target_tags" {
   type = list(string)
-}
-
-variable "instance_tag" {
-  type = string
 }
 
 variable "package_name" {
