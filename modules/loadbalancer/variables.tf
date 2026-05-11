@@ -2,9 +2,6 @@ variable "name" {
   type = string
 }
 
-variable "instance_group" {
-  type = string
-}
 
 variable "web_instance_group" {}
 
