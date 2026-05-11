@@ -45,3 +45,11 @@ variable "ssh_public_key" {
 variable "gcp_apis" {
   type = list(string)
 }
+
+variable "domain_name" {
+  type = string
+}
+
+variable "subdomain" {
+  type = string
+}
