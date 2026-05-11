@@ -40,3 +40,11 @@ resource "google_compute_global_forwarding_rule" "forwarding_rule" {
   target     = google_compute_target_http_proxy.proxy.id
   port_range = "80"
 }
+
+resource "google_compute_managed_ssl_certificate" "ssl_cert" {
+  name = "cloudscaleops-ssl"
+
+  managed {
+    domains = [var.domain_name]
+  }
+}
