@@ -15,10 +15,10 @@ module "network" {
 module "firewall" {
   source = "../../../../modules/firewall"
   network = module.network.network_name
-  name          = var.firewall_name
-  ports         = var.firewall_ports
+  name = var.firewall_name
+  ports = var.firewall_ports
   source_ranges = var.firewall_source_ranges
-  target_tags   = var.firewall_target_tags
+  target_tags = [var.instance_tag]
 }
 
 module "mig" {
