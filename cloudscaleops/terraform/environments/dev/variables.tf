@@ -30,9 +30,17 @@ variable "template_name" {
   type = string
 }
 
-variable "mig_name" {
-  type = string
-}
+variable "web_template_name" {}
+variable "api_template_name" {}
+
+variable "web_mig_name" {}
+variable "api_mig_name" {}
+
+variable "web_target_size" {}
+variable "api_target_size" {}
+
+variable "web_instance_tag" {}
+variable "api_instance_tag" {}
 
 variable "target_size" {
   type = number
