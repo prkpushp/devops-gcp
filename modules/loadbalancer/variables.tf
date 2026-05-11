@@ -6,6 +6,10 @@ variable "instance_group" {
   type = string
 }
 
+variable "web_instance_group" {}
+
+variable "api_instance_group" {}
+
 variable "fqdn" {
   type = string
 }
