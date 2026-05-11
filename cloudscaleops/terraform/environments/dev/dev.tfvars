@@ -10,7 +10,6 @@ firewall_source_ranges = ["0.0.0.0/0"]
 firewall_target_tags = ["web-ssh-cloudscaleops-dev"]
 instance_tag = "web-ssh-cloudscaleops-dev"
 package_name = "nginx"
-welcome_message = "cloudscaleops running successfully"
 web_template_name = "cloudscaleops-web-template"
 api_template_name = "cloudscaleops-api-template"
 
