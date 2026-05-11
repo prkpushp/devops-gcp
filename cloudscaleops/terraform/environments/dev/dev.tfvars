@@ -10,6 +10,7 @@ subdomain = "cloud"
 
 gcp_apis = [
   "compute.googleapis.com",
+  "dns.googleapis.com",
   "iam.googleapis.com",
   "storage.googleapis.com",
   "cloudresourcemanager.googleapis.com"
