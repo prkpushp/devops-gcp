@@ -22,6 +22,14 @@ services:
       - "9115:9115"
 
   webhook:
-    build: ../webhook
+    image: python:3.10
+    container_name: webhook
+    working_dir: /app
+    volumes:
+      - /opt/webhook:/app
+    command: bash -c "pip install -r requirements.txt && python app.py"
     ports:
       - "5000:5000"
+    environment:
+      - GITHUB_TOKEN=your_token_here
+      - REPO=prkpushp/devops-gcp
