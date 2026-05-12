@@ -12,7 +12,13 @@
           - python3
           - python3-pip
         update_cache: yes
-
+    
+    - name: Create env file on VM
+      run: |
+        ssh ubuntu@${{ env.VM_IP }} << EOF
+        echo "GITHUB_TOKEN=${{ secrets.MY_PAT }}" > /opt/monitoring/.env
+        EOF
+        
     - name: Enable Docker
       service:
         name: docker
