@@ -1,0 +1,10 @@
+groups:
+  - name: nginx-alerts
+    rules:
+      - alert: NginxDown
+        expr: probe_success == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Target is down"
