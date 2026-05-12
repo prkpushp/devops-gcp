@@ -17,7 +17,7 @@
       service:
         name: docker
         state: started
-            enabled: yes
+        enabled: yes
             
     - name: Create webhook directory
       file:
