@@ -12,3 +12,7 @@ variable "network" {
   description = "GCP VPC network name"
   type        = string
 }
+variable "firewall_target_tags" {
+  description = "Target tags for firewall rules"
+  type        = list(string)
+}
