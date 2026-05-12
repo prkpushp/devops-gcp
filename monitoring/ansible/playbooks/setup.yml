@@ -35,12 +35,6 @@
       copy:
         src: ../../docker/
         dest: /opt/monitoring/
-
-    - name: Fetch VM IP
-      working-directory: monitoring/terraform
-      run: |
-        VM_IP=$(terraform output -raw vm_ip)
-        echo "VM_IP=$VM_IP" >> $GITHUB_ENV
         
     - name: Deploy Alertmanager config
       template:
