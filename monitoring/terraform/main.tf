@@ -20,6 +20,5 @@ module "monitoring_firewall" {
 
   ports         = var.firewall_ports
   source_ranges = var.firewall_source_ranges 
-
-  target_tags   = [var.firewall_target_tags]
+  target_tags = var.firewall_target_tags
 }
