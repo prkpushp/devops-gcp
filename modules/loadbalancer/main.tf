@@ -68,28 +68,21 @@ resource "google_compute_url_map" "url_map" {
 
   host_rule {
     hosts        = ["*"]
-    path_matcher = "path-matcher"
+    path_matcher = "main"
   }
 
   path_matcher {
 
-    name            = "path-matcher"
-
+    name            = "main"
     default_service = google_compute_backend_service.web_backend.id
 
-    dynamic "path_rule" {
+    path_rule {
 
       for_each = var.path_rules
 
       content {
-
         paths = path_rule.value.paths
-
-        service = (
-          path_rule.value.service == "api"
-          ? google_compute_backend_service.api_backend.id
-          : google_compute_backend_service.web_backend.id
-        )
+        service = local.backend_map[path_rule.value.service]
       }
     }
   }
