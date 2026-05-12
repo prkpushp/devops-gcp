@@ -57,12 +57,6 @@ resource "google_compute_url_map" "http_redirect" {
   }
 }
 
-locals {
-  backend_map = {
-    web = google_compute_backend_service.web_backend.id
-    api = google_compute_backend_service.api_backend.id
-  }
-}
 
 # -----------------------------
 # HTTPS URL Map (real traffic)
@@ -75,26 +69,20 @@ resource "google_compute_url_map" "url_map" {
 
   host_rule {
     hosts        = ["*"]
-    path_matcher = "main"
+    path_matcher = "main-matcher"
   }
 
   path_matcher {
 
-    name            = "main"
+    name            = "main-matcher"
     default_service = google_compute_backend_service.web_backend.id
 
     path_rule {
-
-      for_each = var.path_rules
-
-      content {
-        paths = path_rule.value.paths
-        service = local.backend_map[path_rule.value.service]
-      }
+      paths   = ["/api", "/api/*"]
+      service = google_compute_backend_service.api_backend.id
     }
   }
 }
-
 # -----------------------------
 # HTTP Proxy
 # -----------------------------
