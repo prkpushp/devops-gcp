@@ -38,7 +38,7 @@
 
     - name: Deploy Alertmanager config
       template:
-        src: templates/alertmanager.yml.j2
+        src: ../templates/alertmanager.yml.j2
         dest: /etc/alertmanager/alertmanager.yml
 
     - name: Restart Alertmanager
