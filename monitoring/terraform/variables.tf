@@ -1,3 +1,16 @@
+variable "project_id" {
+  type = string
+}
+
+variable "region" {
+  type = string
+}
+
+variable "zone" {
+  type = string
+}
+
+
 variable "instance_name" {}
 variable "machine_type" { default = "e2-micro" }
 variable "zone" {}
@@ -16,5 +29,11 @@ variable "network_name" {
 }
 
 variable "subnet_name" {
+  type = string
+}
+variable "subnet_cidr" {
+  type = string
+}
+variable "subdomain" {
   type = string
 }
