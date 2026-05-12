@@ -10,6 +10,7 @@
           - docker.io
           - docker-compose
           - python3
+          - nginx
           - python3-pip
         update_cache: yes
     
