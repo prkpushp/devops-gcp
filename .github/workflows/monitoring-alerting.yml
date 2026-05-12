@@ -1,0 +1,129 @@
+name: Monitoring Full Pipeline (Provision + Deploy)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      REGION: asia-south1
+      ZONE: asia-south1-a
+
+    steps:
+
+    # =========================
+    # Checkout
+    # =========================
+    - uses: actions/checkout@v4
+
+    # =========================
+    # GCP Auth
+    # =========================
+    - name: Authenticate GCP
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Setup GCloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    # =========================
+    # Extract Project ID
+    # =========================
+    - name: Extract Project ID
+      run: |
+        echo '${{ secrets.GCP_SA_KEY }}' > sa.json
+        PROJECT_ID=$(jq -r '.project_id' sa.json)
+        echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_ENV
+
+    # =========================
+    # Backend bucket
+    # =========================
+    - name: Create Terraform Backend Bucket
+      run: |
+        gsutil ls -b gs://$PROJECT_ID >/dev/null 2>&1 || \
+        gsutil mb -p $PROJECT_ID -l $REGION gs://$PROJECT_ID
+
+    - name: Generate backend.tf
+      run: |
+        cat <<EOF > monitoring/terraform/backend.tf
+        terraform {
+          backend "gcs" {
+            bucket = "$PROJECT_ID"
+            prefix = "monitoring/dev"
+          }
+        }
+        EOF
+
+    # =========================
+    # Terraform
+    # =========================
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      working-directory: monitoring/terraform
+      run: terraform init -input=false
+
+    - name: Terraform Apply
+      working-directory: monitoring/terraform
+      run: |
+        terraform apply -auto-approve \
+          -var-file="dev.tfvars" \
+          -var="project_id=$PROJECT_ID" \
+          -var="region=$REGION" \
+          -var="zone=$ZONE" \
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+    # =========================
+    # GET VM IP (CRITICAL BRIDGE STEP)
+    # =========================
+    - name: Get VM IP
+      working-directory: monitoring/terraform
+      run: |
+        VM_IP=$(terraform output -raw public_ip)
+        echo "VM_IP=$VM_IP" >> $GITHUB_ENV
+        echo "VM IP: $VM_IP"
+
+    # =========================
+    # Create Ansible Inventory
+    # =========================
+    - name: Create inventory
+      run: |
+        mkdir -p monitoring/ansible/inventory
+
+        echo "[monitoring]" > monitoring/ansible/inventory/dev.ini
+        echo "$VM_IP ansible_user=ubuntu" >> monitoring/ansible/inventory/dev.ini
+
+        cat monitoring/ansible/inventory/dev.ini
+
+    # =========================
+    # SSH Setup
+    # =========================
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    # =========================
+    # Wait for SSH (important)
+    # =========================
+    - name: Wait for VM SSH
+      run: |
+        for i in {1..30}; do
+          ssh -o StrictHostKeyChecking=no ubuntu@$VM_IP "echo ready" && break
+          sleep 10
+        done
+
+    # =========================
+    # Run Ansible
+    # =========================
+    - name: Run Ansible
+      working-directory: monitoring/ansible
+      run: |
+        ansible-playbook \
+          -i inventory/dev.ini \
+          playbooks/setup.yml
