@@ -131,32 +131,7 @@ jobs:
           -var="zone=$ZONE" \
           -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
 
-      - name: Create Hostinger DNS Record
-        run: |
-          DOMAIN="wealthbridgezone.com"
-          SUBDOMAIN="cloud"
-      
-          echo "Creating DNS record for ${SUBDOMAIN}.${DOMAIN}"
-      
-          curl -X POST \
-            "https://developers.hostinger.com/api/dns/v1/zones/$DOMAIN/records" \
-            -H "Authorization: Bearer ${{ secrets.HOSTINGER_API }}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"domain\": \"$DOMAIN\",
-              \"overwrite\": true,
-              \"resource_records\": [
-                {
-                  \"type\": \"A\",
-                  \"name\": \"$SUBDOMAIN\",
-                  \"records\": [
-                    {
-                      \"content\": \"$LB_IP\"
-                    }
-                  ]
-                }
-              ]
-            }"      # ==================================================
+      # ==================================================
       # Fetch Load Balancer IP
       # ==================================================
 
