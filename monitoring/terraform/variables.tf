@@ -13,7 +13,6 @@ variable "zone" {
 
 variable "instance_name" {}
 variable "machine_type" { default = "e2-micro" }
-variable "zone" {}
 variable "ssh_public_key" {}
 variable "instance_tag" {}
 
