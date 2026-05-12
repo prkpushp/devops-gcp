@@ -1,24 +1,25 @@
 module "monitoring_vm" {
   source = "../../modules/compute"
 
-  instance_name  = var.instance_name
-  machine_type   = var.machine_type
+  instance_name  = "monitoring-vm"
+  machine_type   = var.monitoring_machine_type
   zone           = var.zone
   subnetwork     = var.subnetwork
-  instance_tag   = "monitoring"
+
+  instance_tag   = var.monitoring_instance_tag
 
   ssh_public_key = var.ssh_public_key
 }
 
+
 module "monitoring_firewall" {
   source = "../../modules/firewall"
 
-  name          = "monitoring-firewall"
+  name          = var.monitoring_firewall_name
   network       = var.network
 
-  ports         = ["22", "80", "9090", "9093", "9115", "5000"]
+  ports         = var.monitoring_firewall_ports
+  source_ranges = var.monitoring_source_ranges
 
-  source_ranges = ["0.0.0.0/0"]
-
-  target_tags   = ["monitoring"]
+  target_tags   = [var.monitoring_instance_tag]
 }
