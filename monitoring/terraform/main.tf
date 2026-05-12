@@ -4,7 +4,7 @@ module "monitoring_vm" {
   instance_name  = "monitoring-vm"
   machine_type   = var.machine_type
   zone           = var.zone
-  subnetwork     = var.subnetwork
+  subnetwork     = var.subnet_name
 
   instance_tag   = var.instance_tag
 
@@ -16,7 +16,7 @@ module "monitoring_firewall" {
   source = "../../modules/firewall"
 
   name          = var.firewall_name 
-  network       = var.network
+  network       = var.network_name
 
   ports         = var.firewall_ports
   source_ranges = var.firewall_source_ranges 
