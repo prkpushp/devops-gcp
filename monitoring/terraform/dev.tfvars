@@ -1,8 +1,9 @@
 # ==================================================
 # GCP NETWORK CONFIG
 # ==================================================
-network = "cloudscaleops-vpc"
-subnet_name  = "cloudscaleops-subnet"
+network_name = "cloudscaleops-vpc"
+subnet_name = "cloudscaleops-subnet"
+
 subnet_cidr  = "10.20.0.0/24"
 
 # ==================================================
