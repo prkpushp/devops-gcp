@@ -14,7 +14,7 @@ machine_type = "e2-micro"
 
 instance_tag = "monitoring"
 
-monitoring_instance_name = "monitoring-vm"
+instance_name = "monitoring-vm"
 
 # ==================================================
 # FIREWALL CONFIG (MONITORING STACK)
