@@ -86,7 +86,11 @@ jobs:
         VM_IP=$(terraform output -raw vm_ip)
         echo "VM_IP=$VM_IP" >> $GITHUB_ENV
         echo "VM IP: $VM_IP"
-
+    
+    - name: Generate Prometheus config
+      run: |
+        sed "s/\${TARGET_IP}/$VM_IP/g" monitoring/docker/prometheus.yml.tpl > monitoring/docker/prometheus.yml
+        
     # =========================
     # Create Ansible Inventory
     # =========================
