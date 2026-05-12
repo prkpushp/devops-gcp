@@ -40,6 +40,9 @@
       template:
         src: templates/alertmanager.yml.j2
         dest: /etc/alertmanager/alertmanager.yml
+
+    - name: Restart Alertmanager
+      command: docker restart monitoring_alertmanager_1
         
     - name: Clean old containers
       shell: |
