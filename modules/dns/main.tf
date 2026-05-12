@@ -8,7 +8,7 @@ resource "google_dns_managed_zone" "main" {
 resource "google_dns_record_set" "cloud" {
   name         = "cloud.${var.domain}."
   type         = "A"
-  ttl          = 300
+  ttl          = 60
   managed_zone = google_dns_managed_zone.main.name
 
   rrdatas = [
