@@ -24,6 +24,12 @@
         src: ../../docker/
         dest: /opt/monitoring/
 
+    - name: Install Docker Compose plugin
+      apt:
+        name: docker-compose-plugin
+        state: present
+        update_cache: yes
+        
     - name: Run docker compose
       shell: |
         cd /opt/monitoring
