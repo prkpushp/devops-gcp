@@ -140,3 +140,10 @@ resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {
 
   ip_address = google_compute_global_address.lb_ip.address
 }
+
+locals {
+  backend_map = {
+    web = google_compute_backend_service.web_backend.id
+    api = google_compute_backend_service.api_backend.id
+  }
+}
