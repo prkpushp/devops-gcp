@@ -15,9 +15,9 @@
     
     - name: Create env file on VM
       run: |
-        ssh ubuntu@${{ env.VM_IP }} << EOF
-        echo "GITHUB_TOKEN=${{ secrets.MY_PAT }}" > /opt/monitoring/.env
-        EOF
+        ssh ubuntu@${{ env.VM_IP }} << 'EOF'
+    echo "GITHUB_TOKEN=${{ secrets.MY_PAT }}" | sudo tee /opt/monitoring/.env
+    EOF
         
     - name: Enable Docker
       service:
