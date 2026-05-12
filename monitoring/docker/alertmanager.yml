@@ -1,7 +1,16 @@
+global:
+
 route:
-  receiver: webhook
+  receiver: github-remediation
+
+  group_by: ['alertname', 'instance']
+
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
 
 receivers:
-  - name: webhook
-    webhook_configs:
-      - url: "http://localhost:5000/alert"
+
+- name: github-remediation
+  webhook_configs:
+  - url: "http://35.232.5.32:5000/alert"
