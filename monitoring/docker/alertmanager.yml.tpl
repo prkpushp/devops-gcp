@@ -13,4 +13,4 @@ receivers:
 
 - name: github-remediation
   webhook_configs:
-  - url: "http://localhost:5000/alert"
+  - url: "http://${TARGET_IP}:5000/alert"
