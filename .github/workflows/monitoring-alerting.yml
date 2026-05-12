@@ -90,6 +90,7 @@ jobs:
     - name: Generate Prometheus config
       run: |
         sed "s/\${TARGET_IP}/$VM_IP/g" monitoring/docker/prometheus.yml.tpl > monitoring/docker/prometheus.yml
+        sed "s/\${TARGET_IP}/$VM_IP/g" monitoring/docker/alertmanager.yml.tpl > monitoring/docker/alertmanager.yml
         
     # =========================
     # Create Ansible Inventory
