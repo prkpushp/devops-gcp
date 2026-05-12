@@ -1,0 +1,7 @@
+route:
+  receiver: webhook
+
+receivers:
+  - name: webhook
+    webhook_configs:
+      - url: "http://{{ vm_ip }}:5000/alert"
