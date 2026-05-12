@@ -57,6 +57,13 @@ resource "google_compute_url_map" "http_redirect" {
   }
 }
 
+locals {
+  backend_map = {
+    web = google_compute_backend_service.web_backend.id
+    api = google_compute_backend_service.api_backend.id
+  }
+}
+
 # -----------------------------
 # HTTPS URL Map (real traffic)
 # -----------------------------
@@ -141,9 +148,3 @@ resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {
   ip_address = google_compute_global_address.lb_ip.address
 }
 
-locals {
-  backend_map = {
-    web = google_compute_backend_service.web_backend.id
-    api = google_compute_backend_service.api_backend.id
-  }
-}
