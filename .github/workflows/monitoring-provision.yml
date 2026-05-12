@@ -30,8 +30,4 @@ jobs:
       - name: Terraform Apply
         working-directory: monitoring/terraform
         run: |
-          terraform apply -auto-approve \
-          -var="instance_name=monitoring-vm" \
-          -var="zone=$ZONE" \
-          -var="subnetwork=default" \
-          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+          terraform apply -auto-approve -var-file="dev.tfvars"
