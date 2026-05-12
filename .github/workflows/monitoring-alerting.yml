@@ -130,4 +130,4 @@ jobs:
       run: |
         ansible-playbook \
           -i inventory/dev.ini \
-          playbooks/setup.yml --extra-vars "github_pat=${{ secrets.MY_PAT }}"
+          playbooks/setup.yml --extra-vars "github_pat=${{ secrets.MY_PAT }} vm_ip=${{ env.VM_IP }}"
