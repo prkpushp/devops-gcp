@@ -5,16 +5,16 @@ import os
 app = Flask(__name__)
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-REPO = "YOUR_ORG/YOUR_REPO"
-WORKFLOW = "restart-nginx.yml"
+REPO = os.getenv("REPO", "prkpushp/devops-gcp")
 
 @app.route("/alert", methods=["POST"])
 def alert():
     data = request.json
+    instance = data.get("commonLabels", {}).get("instance", "unknown")
 
-    print("ALERT RECEIVED:", data)
+    print(f"Triggering remediation for: {instance}")
 
-    instance = data['alerts'][0]['labels']['instance']
+    url = f"https://api.github.com/repos/{REPO}/actions/workflows/remediate.yml/dispatches"
 
     payload = {
         "ref": "main",
@@ -23,20 +23,20 @@ def alert():
         }
     }
 
-    url = f"https://api.github.com/repos/{REPO}/actions/workflows/{WORKFLOW}/dispatches"
+    headers = {
+        "Authorization": f"Bearer {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
 
-    r = requests.post(
-        url,
-        json=payload,
-        headers={
-            "Authorization": f"Bearer {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github+json"
-        }
-    )
+    r = requests.post(url, json=payload, headers=headers)
 
-    print("GitHub Response:", r.status_code, r.text)
-
+    print(r.status_code, r.text)
     return "ok", 200
+
+
+@app.route("/")
+def home():
+    return "Webhook Running", 200
 
 
 if __name__ == "__main__":
