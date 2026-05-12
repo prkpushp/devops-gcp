@@ -1,5 +1,14 @@
 global:
 
+rule_files:
+  - /etc/prometheus/rules.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
 scrape_configs:
 
   - job_name: "blackbox"
@@ -9,7 +18,7 @@ scrape_configs:
 
     static_configs:
       - targets:
-        - http://35.232.5.32
+        - http://34.180.38.10
 
     relabel_configs:
       - source_labels: [__address__]
