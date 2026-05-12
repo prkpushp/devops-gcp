@@ -35,6 +35,12 @@
         src: ../../docker/
         dest: /opt/monitoring/
 
+    - name: Clean old containers
+      shell: |
+        cd /opt/monitoring
+        docker-compose down --remove-orphans || true
+        docker rm -f webhook || true
+        docker system prune -f || true
         
     - name: Run docker compose
       shell: |
