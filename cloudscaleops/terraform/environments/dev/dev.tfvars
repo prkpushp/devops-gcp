@@ -26,6 +26,10 @@ path_rules = [
   {
     paths   = ["/api", "/api/*"]
     service = "api"
+  },
+  {
+    paths   = ["/"]
+    service = "web"
   }
 ]
 
