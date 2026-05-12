@@ -17,7 +17,18 @@
       service:
         name: docker
         state: started
-        enabled: yes
+            enabled: yes
+            
+    - name: Create webhook directory
+      file:
+        path: /opt/webhook
+        state: directory
+    
+    - name: Copy webhook
+      copy:
+        src: webhook/
+        dest: /opt/webhook/    
+        
 
     - name: Copy monitoring stack
       copy:
