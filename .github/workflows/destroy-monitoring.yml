@@ -61,7 +61,23 @@ jobs:
       # =========================
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-
+        
+      - name: Create Terraform Backend Bucket
+        run: |
+          gsutil ls -b gs://$PROJECT_ID >/dev/null 2>&1 || \
+          gsutil mb -p $PROJECT_ID -l $REGION gs://$PROJECT_ID
+  
+      - name: Generate backend.tf
+        run: |
+          cat <<EOF > monitoring/terraform/backend.tf
+          terraform {
+            backend "gcs" {
+              bucket = "$PROJECT_ID"
+              prefix = "monitoring/dev"
+            }
+          }
+          EOF
+        
       - name: Terraform Init
         working-directory: monitoring/terraform/
         run: |
